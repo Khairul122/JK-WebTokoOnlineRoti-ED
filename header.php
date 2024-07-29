@@ -1,27 +1,29 @@
-<?php 
+<?php
 session_start();
 include 'koneksi/koneksi.php';
-if(isset($_SESSION['kd_cs'])){
+if (isset($_SESSION['kd_cs'])) {
 
 	$kode_cs = $_SESSION['kd_cs'];
 }
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Rapi-Cake Backery</title>
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
-	<script  src="js/jquery.js"></script>
-	<script  src="js/bootstrap.min.js"></script>
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.min.js"></script>
 
 
 </head>
+
 <body>
 	<div class="container-fluid">
 		<div class="row top">
-		
+
 		</div>
 	</div>
 
@@ -44,24 +46,24 @@ if(isset($_SESSION['kd_cs'])){
 					<li><a href="produk.php">Produk</a></li>
 					<li><a href="about.php">Tentang Kami</a></li>
 					<li><a href="manual.php">Manual Aplikasi</a></li>
-					<?php 
-					if(isset($_SESSION['kd_cs'])){
-					$kode_cs = $_SESSION['kd_cs'];
-					$cek = mysqli_query($conn, "SELECT kode_produk from keranjang where kode_customer = '$kode_cs' ");
-					$value = mysqli_num_rows($cek);
+					<?php
+					if (isset($_SESSION['kd_cs'])) {
+						$kode_cs = $_SESSION['kd_cs'];
+						$cek = mysqli_query($conn, "SELECT kode_produk from keranjang where kode_customer = '$kode_cs' ");
+						$value = mysqli_num_rows($cek);
 
-						?>
+					?>
 						<li><a href="keranjang.php"><i class="glyphicon glyphicon-shopping-cart"></i> <b>[ <?= $value ?> ]</b></a></li>
 
-						<?php 
-					}else{
+					<?php
+					} else {
 						echo "
 						<li><a href='keranjang.php'><i class='glyphicon glyphicon-shopping-cart'></i> [0]</a></li>
 
 						";
 					}
-					if(!isset($_SESSION['user'])){
-						?>
+					if (!isset($_SESSION['user'])) {
+					?>
 
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-user"></i> Akun <span class="caret"></span></a>
@@ -70,17 +72,18 @@ if(isset($_SESSION['kd_cs'])){
 								<li><a href="register.php">Register</a></li>
 							</ul>
 						</li>
-						<?php 
-					}else{
-						?>
+					<?php
+					} else {
+					?>
 						<li class="dropdown">
 							<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="glyphicon glyphicon-user"></i> <?= $_SESSION['user']; ?> <span class="caret"></span></a>
 							<ul class="dropdown-menu">
+								<li><a href="riwayat.php">Riwayat Transaksi</a></li>
 								<li><a href="proses/logout.php">Log Out</a></li>
 							</ul>
 						</li>
 
-						<?php 
+					<?php
 					}
 					?>
 				</ul>

@@ -1,14 +1,23 @@
-<?php 
+<?php
 include 'header.php';
+
 $invoices = $_GET['inv'];
+
+// Cek keberhasilan query
 $d_order = mysqli_query($conn, "SELECT * FROM produksi WHERE invoice = '$invoices'");
+if (!$d_order) {
+    die('Query Error: ' . mysqli_error($conn));
+}
 $t_order = mysqli_fetch_assoc($d_order);
 
-$sortage = mysqli_query($conn, "SELECT * FROM produksi where cek = '1'");
+$sortage = mysqli_query($conn, "SELECT * FROM produksi WHERE cek = '1'");
 $cek_sor = mysqli_num_rows($sortage);
 
-// customer
+// Cek keberhasilan query customer
 $cs = mysqli_query($conn, "SELECT * FROM customer WHERE kode_customer = '".$t_order['kode_customer']."'");
+if (!$cs) {
+    die('Query Error: ' . mysqli_error($conn));
+}
 $t_cs = mysqli_fetch_assoc($cs);
 ?>
 
@@ -30,82 +39,80 @@ $t_cs = mysqli_fetch_assoc($cs);
 		</thead>
 		<tbody>
 
-			<?php 
-			$result = mysqli_query($conn, "SELECT DISTINCT invoice, kode_customer, status, kode_produk, qty,terima,tolak, cek FROM produksi group by invoice");
+			<?php
+			$result = mysqli_query($conn, "SELECT invoice, GROUP_CONCAT(DISTINCT kode_customer) AS kode_customer, GROUP_CONCAT(DISTINCT status) AS status, GROUP_CONCAT(DISTINCT kode_produk) AS kode_produk, GROUP_CONCAT(DISTINCT qty) AS qty, GROUP_CONCAT(DISTINCT terima) AS terima, GROUP_CONCAT(DISTINCT tolak) AS tolak, GROUP_CONCAT(DISTINCT cek) AS cek FROM produksi GROUP BY invoice");
+			if (!$result) {
+				die('Query Error: ' . mysqli_error($conn));
+			}
 			$no = 1;
-			$array = 0;
-			while($row = mysqli_fetch_assoc($result)){
-				$kodep = $row['kode_produk'];
+			while ($row = mysqli_fetch_assoc($result)) {
+				$kodep = explode(",", $row['kode_produk'])[0];
 				$inv = $row['invoice'];
-				?>
+			?>
 
 				<tr>
 					<td><?= $no; ?></td>
 					<td><?= $row['invoice']; ?></td>
-					<td><?= $row['kode_customer']; ?></td>
-					<?php if($row['terima'] == 1){ ?>
-						<td style="color: green;font-weight: bold;">Pesanan Diterima (Siap Kirim)
-							<?php
-						}else if($row['tolak'] == 1){
-							?>
-							<td style="color: red;font-weight: bold;">Pesanan Ditolak
-								<?php 
-							}
-							if($row['terima'] == 0 && $row['tolak'] == 0){
-								?>
-								<td style="color: orange;font-weight: bold;"><?= $row['status']; ?>
-								<?php 
-							}
-							$t_bom = mysqli_query($conn, "SELECT * FROM bom_produk WHERE kode_produk = '$kodep'");
+					<td><?= explode(",", $row['kode_customer'])[0]; ?></td>
+					<?php if (explode(",", $row['terima'])[0] == 1) { ?>
+						<td style="color: green; font-weight: bold;">Pesanan Diterima (Siap Kirim)
+						<?php
+					} else if (explode(",", $row['tolak'])[0] == 1) {
+						?>
+						<td style="color: red; font-weight: bold;">Pesanan Ditolak
+						<?php
+					}
+					if (explode(",", $row['terima'])[0] == 0 && explode(",", $row['tolak'])[0] == 0) {
+						?>
+						<td style="color: orange; font-weight: bold;"><?= explode(",", $row['status'])[0]; ?>
+						<?php
+					}
+					$t_bom = mysqli_query($conn, "SELECT * FROM bom_produk WHERE kode_produk = '$kodep'");
+					if (!$t_bom) {
+						die('Query Error: ' . mysqli_error($conn));
+					}
 
-							while($row1 = mysqli_fetch_assoc($t_bom)){
-								$kodebk = $row1['kode_bk'];
+					while ($row1 = mysqli_fetch_assoc($t_bom)) {
+						$kodebk = $row1['kode_bk'];
 
-								$inventory = mysqli_query($conn, "SELECT * FROM inventory WHERE kode_bk = '$kodebk'");
-								$r_inv = mysqli_fetch_assoc($inventory);
+						$inventory = mysqli_query($conn, "SELECT * FROM inventory WHERE kode_bk = '$kodebk'");
+						if (!$inventory) {
+							die('Query Error: ' . mysqli_error($conn));
+						}
+						$r_inv = mysqli_fetch_assoc($inventory);
 
-								$kebutuhan = $row1['kebutuhan'];	
-								$qtyorder = $row['qty'];
-								$inventory = $r_inv['qty'];
+						$kebutuhan = $row1['kebutuhan'];
+						$qtyorder = explode(",", $row['qty'])[0];
+						$inventory_qty = $r_inv['qty'];
 
-								$bom = ($kebutuhan * $qtyorder);
-								$hasil = $inventory - $bom;
-								if($hasil < 0 && $row['tolak'] == 0){
-									mysqli_query($conn, "UPDATE produksi SET cek = '1' where invoice = '$inv'");
-										$nama_material[] = $r_inv['nama'];
-									?>
-
-
-
-									<?php 
-								}
-							}
-							?>
+						$bom = ($kebutuhan * $qtyorder);
+						$hasil = $inventory_qty - $bom;
+						if ($hasil < 0 && explode(",", $row['tolak'])[0] == 0) {
+							mysqli_query($conn, "UPDATE produksi SET cek = '1' WHERE invoice = '$inv'");
+							$nama_material[] = $r_inv['nama'];
+						}
+					}
+						?>
 						</td>
 						<td>2020/26-01</td>
 						<td>
-							<?php if( $row['tolak']==0 && $row['cek']==1 && $row['terima']==0){ ?>
-								<a href="inventory.php?cek=0" id="rq" class="btn btn-warning"><i class="glyphicon glyphicon-warning-sign"></i> Request Material Shortage</a> 
-								<a href="proses/tolak.php?inv=<?= $row['invoice']; ?>" class="btn btn-danger" onclick="return confirm('Yakin Ingin Menolak ?')"><i class="glyphicon glyphicon-remove-sign"></i> Tolak</a> 
-							<?php }else if($row['terima'] == 0 && $row['cek']==0){ ?>
-
-								<a href="proses/terima.php?inv=<?= $row['invoice']; ?>&kdp=<?= $row['kode_produk']; ?>" class="btn btn-success"><i class="glyphicon glyphicon-ok-sign"></i> Terima</a> 
-								<a href="proses/tolak.php?inv=<?= $row['invoice']; ?>" class="btn btn-danger" onclick="return confirm('Yakin Ingin Menolak ?')"><i class="glyphicon glyphicon-remove-sign"></i> Tolak</a> 
+							<?php if (explode(",", $row['tolak'])[0] == 0 && explode(",", $row['cek'])[0] == 1 && explode(",", $row['terima'])[0] == 0) { ?>
+								<a href="inventory.php?cek=0" id="rq" class="btn btn-warning"><i class="glyphicon glyphicon-warning-sign"></i> Request Material Shortage</a>
+								<a href="proses/tolak.php?inv=<?= $row['invoice']; ?>" class="btn btn-danger" onclick="return confirm('Yakin Ingin Menolak ?')"><i class="glyphicon glyphicon-remove-sign"></i> Tolak</a>
+							<?php } else if (explode(",", $row['terima'])[0] == 0 && explode(",", $row['cek'])[0] == 0) { ?>
+								<a href="proses/terima.php?inv=<?= $row['invoice']; ?>&kdp=<?= $row['kode_produk']; ?>" class="btn btn-success"><i class="glyphicon glyphicon-ok-sign"></i> Terima</a>
+								<a href="proses/tolak.php?inv=<?= $row['invoice']; ?>" class="btn btn-danger" onclick="return confirm('Yakin Ingin Menolak ?')"><i class="glyphicon glyphicon-remove-sign'></i> Tolak</a> 
 							<?php } ?>
-
-							<a href="detailorder.php?inv=<?= $row['invoice']; ?>" type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-eye-open"></i> Detail Pesanan</a>
+							<a href=" detailorder.php?inv=<?= $row['invoice']; ?>" type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-eye-open"></i> Detail Pesanan</a>
 						</td>
-					</tr>
-					<?php
-					$no++; 
-				}
+				</tr>
+			<?php
+				$no++;
+			}
+			?>
 
-				?>
-
-			</tbody>
-		</table>
-
-
+		</tbody>
+	</table>
 
 	<button type="hidden" data-toggle="modal" data-target="#myModal" id="btn" style="background-color: #fff; border: #fff;">
 	</button>
@@ -132,7 +139,7 @@ $t_cs = mysqli_fetch_assoc($cs);
 						</tr>
 						<tr>
 							<td>Alamat</td>
-							<td><?php echo  $t_order['alamat'].",".$t_order['kota']." ".$t_order['provinsi'].",".$t_order['kode_pos']; ?></td>
+							<td><?php echo  $t_order['alamat'] . "," . $t_order['kota'] . " " . $t_order['provinsi'] . "," . $t_order['kode_pos']; ?></td>
 						</tr>
 						<tr>
 							<td>No Telp</td>
@@ -149,30 +156,43 @@ $t_cs = mysqli_fetch_assoc($cs);
 							<th>Nama Produk</th>
 							<th>Harga</th>
 							<th>qty</th>
+							<th>Pengiriman</th>
+							<th>Bukti Pengiriman</th>
 							<th>Subtotal</th>
 						</tr>
-					<?php 
+						<?php
 						$order = mysqli_query($conn, "SELECT * FROM produksi WHERE invoice = '$invoices'");
+						if (!$order) {
+							die('Query Error: ' . mysqli_error($conn));
+						}
 						$no = 1;
 						$grand = 0;
 						while ($list = mysqli_fetch_assoc($order)) {
-					 ?>
-						<tr>
-							<td><?= $no;  ?></td>
-							<td><?= $list['kode_produk']; ?></td>
-							<td><?= $list['nama_produk']; ?></td>
-							<td><?= number_format($list['harga'], 0, ".", ".");  ?></td>
-							<td><?= $list['qty'];  ?></td>
-							<td><?= number_format($list['harga']*$list['qty'], 0, ".", ".");  ?></td>
-						</tr>
-					<?php 
-						$sub = $list['harga'] * $list['qty'];
-						$grand += $sub;
-						$no++;
+						?>
+							<tr>
+								<td><?= $no;  ?></td>
+								<td><?= $list['kode_produk']; ?></td>
+								<td><?= $list['nama_produk']; ?></td>
+								<td><?= number_format($list['harga'], 0, ".", ".");  ?></td>
+								<td><?= $list['qty'];  ?></td>
+								<td><?= $list['pengiriman']; ?></td>
+								<td>
+									<?php if(!empty($list['bukti_pengiriman'])): ?>
+										<img src="../bukti_pengiriman/<?= $list['bukti_pengiriman']; ?>" alt="Bukti Pengiriman" style="max-width: 100px; height: auto;">
+									<?php else: ?>
+										<p>Tidak ada bukti pengiriman yang diunggah.</p>
+									<?php endif; ?>
+								</td>
+								<td><?= number_format($list['harga'] * $list['qty'], 0, ".", ".");  ?></td>
+							</tr>
+						<?php
+							$sub = $list['harga'] * $list['qty'];
+							$grand += $sub;
+							$no++;
 						}
-					 ?>
+						?>
 						<tr>
-							<td colspan="6" class="text-right"><b>Grand Total = <?= number_format($grand, 0, ".", ".");  ?></b></td>
+							<td colspan="8" class="text-right"><b>Grand Total = <?= number_format($t_order['grand_total'], 0, ".", ".");  ?></b></td>
 						</tr>
 					</table>
 				</div>
@@ -183,55 +203,54 @@ $t_cs = mysqli_fetch_assoc($cs);
 		</div>
 	</div>
 
-		<?php 
-if($cek_sor > 0){
- ?>
-	<br>
-	<br>
-	<div class="row">
-		<div class="col-md-4 bg-danger" style="padding:10px;">
-			<h4>Kekurangan Material </h4>
-			<h5 style="color: red;font-weight: bold;">Silahkan Tambah Stok Material dibawah ini : </h5>
-			<table class="table table-striped">
-				<tr>
-					<th>No</th>
-					<th>Material</th>
-				</tr>
-	<?php 
-	$arr = array_values(array_unique($nama_material));
-	for ($i=0; $i < count($arr); $i++) { 
-
-	 ?>
-				<tr>
-					<td><?= $i+1 ?></td>
-					<td><?= $arr[$i]; ?></td>
-				</tr>
-	<?php } ?>
-			</table>
+	<?php
+	if ($cek_sor > 0) {
+	?>
+		<br>
+		<br>
+		<div class="row">
+			<div class="col-md-4 bg-danger" style="padding:10px;">
+				<h4>Kekurangan Material</h4>
+				<h5 style="color: red; font-weight: bold;">Silahkan Tambah Stok Material di bawah ini:</h5>
+				<table class="table table-striped">
+					<tr>
+						<th>No</th>
+						<th>Material</th>
+					</tr>
+					<?php
+					$arr = array_values(array_unique($nama_material));
+					for ($i = 0; $i < count($arr); $i++) {
+					?>
+						<tr>
+							<td><?= $i + 1 ?></td>
+							<td><?= $arr[$i]; ?></td>
+						</tr>
+					<?php } ?>
+				</table>
+			</div>
 		</div>
-	</div>
-<?php 
-}
- ?>
-	</div>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
-	<br>
+	<?php
+	}
+	?>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 <script type="text/javascript">
-	$( document ).ready(function() {
-		$( "#btn" ).click();
+	$(document).ready(function() {
+		$("#btn").click();
 	});
 </script>
 
-	<?php 
-	include 'footer.php';
-	?>
+<?php
+include 'footer.php';
+?>

@@ -23,7 +23,7 @@ while($row = mysqli_fetch_assoc($result)){
 		$inventory = mysqli_query($conn, "UPDATE inventory SET qty = '$hasil' WHERE kode_bk = '$kodebk'");
 
 		if($inventory){
-			mysqli_query($conn, "UPDATE produksi SET terima = '1', status = '0' WHERE invoice = '$inv'");
+			mysqli_query($conn, "UPDATE produksi SET terima = '1', status = 'Pesanan Diterima' WHERE invoice = '$inv'");
 
 			echo "
 			<script>
