@@ -1,4 +1,4 @@
-<?php 
+<?php
 include 'header.php';
 include 'koneksi/koneksi.php';
 $kd = mysqli_real_escape_string($conn, $_GET['kode_cs']);
@@ -7,9 +7,9 @@ $rows = mysqli_fetch_assoc($cs);
 ?>
 
 <div class="container" style="padding-bottom: 200px">
-    <h2 style=" width: 100%; border-bottom: 4px solid #ff8680"><b>Checkout</b></h2>
+    <h2 style="width: 100%; border-bottom: 4px solid #ff8680"><b>Checkout</b></h2>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <h4>Daftar Pesanan</h4>
             <table class="table table-striped">
                 <tr>
@@ -19,12 +19,12 @@ $rows = mysqli_fetch_assoc($cs);
                     <th>Qty</th>
                     <th>Sub Total</th>
                 </tr>
-                <?php 
+                <?php
                 $result = mysqli_query($conn, "SELECT * FROM keranjang WHERE kode_customer = '$kd'");
                 $no = 1;
                 $hasil = 0;
-                while($row = mysqli_fetch_assoc($result)){
-                    ?>
+                while ($row = mysqli_fetch_assoc($result)) {
+                ?>
                     <tr>
                         <td><?= $no; ?></td>
                         <td><?= $row['nama_produk']; ?></td>
@@ -32,7 +32,7 @@ $rows = mysqli_fetch_assoc($cs);
                         <td><?= $row['qty']; ?></td>
                         <td>Rp.<?= number_format($row['harga'] * $row['qty']);  ?></td>
                     </tr>
-                    <?php 
+                <?php
                     $total = $row['harga'] * $row['qty'];
                     $hasil += $total;
                     $no++;
@@ -45,12 +45,28 @@ $rows = mysqli_fetch_assoc($cs);
                 <tr>
                     <td colspan="5" style="text-align: right; font-weight: bold;">Grand Total = <span id="grand-total"><?= number_format($hasil); ?></span></td>
                 </tr>
+
             </table>
         </div>
+
     </div>
     <div class="row">
         <div class="col-md-6 bg-success">
             <h5>Pastikan Pesanan Anda Sudah Benar</h5>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-6 bg-info">
+            <h5>Rekening Pembayaran</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 bg-light" style="padding-left: 50px;">
+            <h5>Rekening Pembayaran</h5>
+            <p>0832292928 AN Weni Rinanda Putri (Dana)</p>
+            <p>0349488 AN Weni Rinanda Putri (Mandiri)</p>
+            <p>0615020103456 AN Rinanda Putri (BRI)</p>
         </div>
     </div>
     <br>
@@ -118,56 +134,58 @@ $rows = mysqli_fetch_assoc($cs);
         <button type="submit" class="btn btn-success"><i class="glyphicon glyphicon-shopping-cart"></i> Order Sekarang</button>
         <a href="keranjang.php" class="btn btn-danger">Cancel</a>
     </form>
+    <br>
+
 </div>
 
 <script>
-function toggleOngkir() {
-    var pengiriman = document.getElementById('pengiriman').value;
-    var ongkirForm = document.getElementById('ongkir-form');
-    var ongkirRow = document.getElementById('ongkir-row');
-    var ongkirAmount = document.getElementById('ongkir-amount');
-    var totalHidden = document.getElementById('total-hidden').value;
-    var grandTotalElement = document.getElementById('grand-total');
-    var grandTotalHidden = document.getElementById('grand-total-hidden');
+    function toggleOngkir() {
+        var pengiriman = document.getElementById('pengiriman').value;
+        var ongkirForm = document.getElementById('ongkir-form');
+        var ongkirRow = document.getElementById('ongkir-row');
+        var ongkirAmount = document.getElementById('ongkir-amount');
+        var totalHidden = document.getElementById('total-hidden').value;
+        var grandTotalElement = document.getElementById('grand-total');
+        var grandTotalHidden = document.getElementById('grand-total-hidden');
 
-    if (pengiriman === 'Diantar') {
-        ongkirForm.style.display = 'block';
-        ongkirRow.style.display = 'table-row';
+        if (pengiriman === 'Diantar') {
+            ongkirForm.style.display = 'block';
+            ongkirRow.style.display = 'table-row';
 
+            var ongkir = document.getElementById('ongkir').value;
+            ongkirAmount.textContent = 'Rp.' + new Intl.NumberFormat().format(ongkir);
+            var grandTotal = parseInt(totalHidden) + parseInt(ongkir);
+            grandTotalElement.textContent = new Intl.NumberFormat().format(grandTotal);
+            grandTotalHidden.value = grandTotal;
+            document.getElementById('ongkir-hidden').value = ongkir;
+        } else {
+            ongkirForm.style.display = 'none';
+            ongkirRow.style.display = 'none';
+
+            var grandTotal = parseInt(totalHidden);
+            grandTotalElement.textContent = new Intl.NumberFormat().format(grandTotal);
+            grandTotalHidden.value = grandTotal;
+            ongkirAmount.textContent = 'Rp.0';
+            document.getElementById('ongkir-hidden').value = 0;
+        }
+    }
+
+    function updateOngkir() {
         var ongkir = document.getElementById('ongkir').value;
-        ongkirAmount.textContent = 'Rp.' + new Intl.NumberFormat().format(ongkir);
+        var ongkirAmount = document.getElementById('ongkir-amount');
+        var totalHidden = document.getElementById('total-hidden').value;
+        var grandTotalElement = document.getElementById('grand-total');
+        var grandTotalHidden = document.getElementById('grand-total-hidden');
+
         var grandTotal = parseInt(totalHidden) + parseInt(ongkir);
         grandTotalElement.textContent = new Intl.NumberFormat().format(grandTotal);
         grandTotalHidden.value = grandTotal;
+
+        ongkirAmount.textContent = 'Rp.' + new Intl.NumberFormat().format(ongkir);
         document.getElementById('ongkir-hidden').value = ongkir;
-    } else {
-        ongkirForm.style.display = 'none';
-        ongkirRow.style.display = 'none';
-
-        var grandTotal = parseInt(totalHidden);
-        grandTotalElement.textContent = new Intl.NumberFormat().format(grandTotal);
-        grandTotalHidden.value = grandTotal;
-        ongkirAmount.textContent = 'Rp.0';
-        document.getElementById('ongkir-hidden').value = 0;
     }
-}
-
-function updateOngkir() {
-    var ongkir = document.getElementById('ongkir').value;
-    var ongkirAmount = document.getElementById('ongkir-amount');
-    var totalHidden = document.getElementById('total-hidden').value;
-    var grandTotalElement = document.getElementById('grand-total');
-    var grandTotalHidden = document.getElementById('grand-total-hidden');
-
-    var grandTotal = parseInt(totalHidden) + parseInt(ongkir);
-    grandTotalElement.textContent = new Intl.NumberFormat().format(grandTotal);
-    grandTotalHidden.value = grandTotal;
-
-    ongkirAmount.textContent = 'Rp.' + new Intl.NumberFormat().format(ongkir);
-    document.getElementById('ongkir-hidden').value = ongkir;
-}
 </script>
 
-<?php 
+<?php
 include 'footer.php';
 ?>

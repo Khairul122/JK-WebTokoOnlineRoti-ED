@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 29, 2024 at 07:27 AM
+-- Generation Time: Jul 31, 2024 at 09:51 AM
 -- Server version: 8.0.30
 -- PHP Version: 7.4.3
 
@@ -216,7 +216,8 @@ INSERT INTO `produksi` (`id_order`, `invoice`, `kode_customer`, `kode_produk`, `
 (18, 'INV0009', 'C0006', 'P0001', 'Roti Sobek', 1, 10000, 'Pesanan Baru', '2024-07-29', 'Lhokseumawe', 'Lhokseumawe', 'Lhoksuemawe', '24353', 0, 0, 0, NULL, NULL, 'Dijemput', 'ttd.jpg', NULL),
 (19, 'INV0010', 'C0006', 'P0001', 'Roti Sobek', 1, 10000, 'Pesanan Ditolak', '2024-07-29', 'Lhokseumawe', 'Lhokseumawe', 'Lhoksuemawe', '24353', 2, 1, 0, NULL, NULL, 'Diantar', 'ttd.png', NULL),
 (20, 'INV0011', 'C0006', 'P0001', 'Roti Sobek', 2, 10000, 'Pesanan Diterima', '2024-07-29', 'Lhokseumawe', 'Lhokseumawe', 'Lhoksuemawe', '24353', 1, 0, 0, NULL, NULL, 'Diantar', '', 40000),
-(21, 'INV0012', 'C0006', 'P0001', 'Roti Sobek', 1, 10000, '0', '2024-07-29', 'Lhokseumawe', 'Lhokseumawe', 'Lhoksuemawe', '24353', 1, 0, 0, NULL, 'Pesanan diantar', 'Diantar', 'WIN_20240704_11_26_09_Pro.jpg', 30000);
+(21, 'INV0012', 'C0006', 'P0001', 'Roti Sobek', 1, 10000, '0', '2024-07-29', 'Lhokseumawe', 'Lhokseumawe', 'Lhoksuemawe', '24353', 1, 0, 0, NULL, 'Pesanan diantar', 'Diantar', 'WIN_20240704_11_26_09_Pro.jpg', 30000),
+(22, 'INV0013', 'C0006', 'P0001', 'Roti Sobek', 2, 10000, 'Pesanan Baru', '2024-07-31', 'Lhokseumawe', 'Lhokseumawe', 'Lhoksuemawe', '24353', 0, 0, 0, NULL, NULL, 'Dijemput', 'Camille - Day cream - 75.000.jpeg', 20000);
 
 -- --------------------------------------------------------
 
@@ -397,13 +398,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `keranjang`
 --
 ALTER TABLE `keranjang`
-  MODIFY `id_keranjang` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id_keranjang` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `produksi`
 --
 ALTER TABLE `produksi`
-  MODIFY `id_order` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id_order` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `report_cancel`
